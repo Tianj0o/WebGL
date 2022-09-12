@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+  <script src="../utils/index.js"></script>
+</head>
+
+<body>
+  <canvas id="canvas" width="300" height="300"></canvas>
+
+  <script>
+
+    function drawPoint1() {
+      const VSHADER_SOURCE = `
+      void main(){
+        gl_Position = vec4(0.5, 0.5, 0.0, 1.0);
+        gl_PointSize = 10.0;
+      }
+    `
+      const FSHADER_SOURCE = `
+      void main(){
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }
+    `
+      const canvas = document.querySelector('#canvas');
+      const gl = canvas.getContext('webgl');
+      if (!gl) {
+        console.log('failed to get the ctx for webgl');
+      }
+      if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.log('failed to initialize shaders');
+      }
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.POINTS, 0, 1)
+    }
+    // drawPoint1()
+
+    function drawPoint2() {
+      const VSHADER_SOURCE = `
+      attribute vec4 a_Position;
+      attribute float a_PointSize;
+      void main(){
+        gl_Position = a_Position;
+        gl_PointSize = a_PointSize;
+      }
+    `
+      const FSHADER_SOURCE = `
+      void main(){
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }
+    `
+      const canvas = document.querySelector('#canvas');
+      const gl = canvas.getContext('webgl');
+      if (!gl) {
+        console.log('failed to get the ctx for webgl');
+      }
+      if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.log('failed to initialize shaders');
+      }
+
+      const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+      gl.vertexAttrib3f(a_Position, 0.5, 0.2, 0.0);
+      const a_PointSize = gl.getAttribLocation(gl.program, 'a_PointSize');
+      gl.vertexAttrib1f(a_PointSize, 30);
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.POINTS, 0, 1)
+    }
+    drawPoint2()
+  </script>
+</body>
+
+</html>
