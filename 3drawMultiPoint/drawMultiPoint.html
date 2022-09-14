@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../utils/index.js"></script>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <script>
+        function drawMultiPoint() {
+            const canvas = document.querySelector('#canvas');
+            const gl = canvas.getContext('webgl');
+            const VSHADER_SOURCE = `
+                attribute vec4 a_Position;
+                void main(){
+                    gl_Position = a_Position;
+                    gl_PointSize = 10.0;                    
+                }
+            `
+            const FSHARED_SOURCE = `
+                void main(){
+                    gl_FragColor = vec4(0,0,1.0,1.0);
+                }
+            `
+            if (!initShaders(gl, VSHADER_SOURCE, FSHARED_SOURCE)) {
+                console.log('error')
+            }
+            const n = initVertexBuffers(gl, [0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.POINTS, 0, 3);
+        }
+        function drawTraingles() {
+            const canvas = document.querySelector('#canvas');
+            const gl = canvas.getContext('webgl');
+            const VSHADER_SOURCE = `
+                attribute vec4 a_Position;
+                void main(){
+                    gl_Position = a_Position;
+                }
+            `
+            const FSHARED_SOURCE = `
+                void main(){
+                    gl_FragColor = vec4(0,0,1.0,1.0);
+                }
+            `
+            if (!initShaders(gl, VSHADER_SOURCE, FSHARED_SOURCE)) {
+                console.log('error')
+            }
+            const n = initVertexBuffers(gl, [0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.LINE_LOOP, 0, 3);
+        }
+
+
+        function drawRect() {
+            const canvas = document.querySelector('#canvas');
+            const gl = canvas.getContext('webgl');
+            const VSHADER_SOURCE = `
+                attribute vec4 a_Position;
+                void main(){
+                    gl_Position = a_Position;
+                }
+            `
+            const FSHARED_SOURCE = `
+                void main(){
+                    gl_FragColor = vec4(0,0,1.0,1.0);
+                }
+            `
+            if (!initShaders(gl, VSHADER_SOURCE, FSHARED_SOURCE)) {
+                console.log('error')
+            }
+            const n = initVertexBuffers(gl, [-0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5]);
+            // const n = initVertexBuffers(gl, [-0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5]);
+
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        function initVertexBuffers(gl, pointAarray) {
+            const array = new Float32Array(pointAarray);
+
+            const n = 3;
+            // 创建缓冲区对象
+            const vertexBuffer = gl.createBuffer()
+            // 将缓冲区对象绑定到目标
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            // 向缓冲区写入数据
+            gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+            const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+
+            gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(a_Position)
+            return n
+        }
+
+
+        // drawMultiPoint()
+        // drawTraingles()
+        drawRect()
+    </script>
+</body>
+
+</html>
