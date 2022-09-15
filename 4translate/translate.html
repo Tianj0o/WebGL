@@ -81,7 +81,13 @@
             gl.drawArrays(gl.LINE_LOOP, 0, 3);
         }
 
-        drawAndRotate(0)
+        drawAndRotate(90);
+        let a = 0;
+        function start() {
+            drawAndRotate(a++)
+            requestAnimationFrame(start)
+        }
+        start()
         function initVertexBuffers(gl, pointAarray) {
             const array = new Float32Array(pointAarray);
 
