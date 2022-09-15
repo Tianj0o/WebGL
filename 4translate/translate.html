@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../utils/index.js"></script>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <script>
+        function drawAndTranslate() {
+            const canvas = document.querySelector('#canvas');
+            const gl = canvas.getContext('webgl');
+            const VSHADER_SOURCE = `
+                attribute vec4 a_Position;
+                uniform vec4 u_Translation;
+                void main(){
+                    gl_Position = a_Position + u_Translation;
+                }
+            `
+            const FSHARED_SOURCE = `
+                void main(){
+                    gl_FragColor = vec4(0,0,1.0,1.0);
+                }
+            `
+            if (!initShaders(gl, VSHADER_SOURCE, FSHARED_SOURCE)) {
+                console.log('error')
+            }
+            const n = initVertexBuffers(gl, [0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+            const u_Translation = gl.getUniformLocation(gl.program, 'u_Translation');
+            gl.uniform4f(u_Translation, 0.2, 0.2, 0.0, 0.0);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.LINE_LOOP, 0, 3);
+        }
+        // drawAndTranslate()
+
+        function drawAndRotate(Anger) {
+            const canvas = document.querySelector('#canvas');
+            const gl = canvas.getContext('webgl');
+            const VSHADER_SOURCE = `
+                attribute vec4 a_Position;
+                uniform float u_CosB,u_SinB;
+                void main(){
+                    gl_Position.x = a_Position.x*u_CosB-a_Position.y*u_SinB;
+                    gl_Position.y = a_Position.x*u_SinB+a_Position.y*u_CosB;
+                    gl_Position.z = a_Position.z;
+                    gl_Position.w = 1.0;
+                }
+            `
+            const FSHARED_SOURCE = `
+                void main(){
+                    gl_FragColor = vec4(0,0,1.0,1.0);
+                }
+            `
+            if (!initShaders(gl, VSHADER_SOURCE, FSHARED_SOURCE)) {
+                console.log('error')
+            }
+            const n = initVertexBuffers(gl, [0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+
+
+            const u_CosB = gl.getUniformLocation(gl.program, 'u_CosB');
+            const u_SinB = gl.getUniformLocation(gl.program, 'u_SinB');
+
+
+            gl.uniform1f(u_CosB, Math.cos(Anger * Math.PI / 180.0));
+            gl.uniform1f(u_SinB, Math.sin(Anger * Math.PI / 180.0));
+
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.LINE_LOOP, 0, 3);
+        }
+
+        drawAndRotate(0)
+        function initVertexBuffers(gl, pointAarray) {
+            const array = new Float32Array(pointAarray);
+
+            const n = 3;
+            // 创建缓冲区对象
+            const vertexBuffer = gl.createBuffer()
+            // 将缓冲区对象绑定到目标
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            // 向缓冲区写入数据
+            gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+            const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+
+            gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(a_Position)
+            return n
+        }
+    </script>
+</body>
+
+</html>
