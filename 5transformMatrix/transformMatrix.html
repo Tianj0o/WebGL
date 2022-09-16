@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=
+  , initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="../utils/index.js"></script>
+  <canvas id="canvas" width="300" height="300"></canvas>
+
+  <script>
+
+    function transform(anger) {
+      const VSHADER_SOURCE = `
+        attribute vec4 a_Position;
+        uniform mat4 u_trsMrx;
+        void main(){
+          gl_Position = u_trsMrx * a_Position;
+        }
+      `
+      const FSHADER_SOURCE = `
+        void main(){
+          gl_FragColor = vec4(0.0,0.0,1.0,1.0);
+        }
+      `
+      const canvas = document.querySelector('#canvas')
+      const gl = canvas.getContext("webgl")
+
+      if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.log('init shaders failed');
+      }
+
+      const n = initVertexBuffers(gl, [0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+
+      const r = Math.PI * anger / 180;
+      const cos_a = Math.cos(r);
+      const sin_a = Math.sin(r);
+      const trsMrx = gl.getUniformLocation(gl.program, 'u_trsMrx');
+      // 旋转矩阵
+      const trxMrx_array = new Float32Array([
+        cos_a, sin_a, 0, 0,
+        -sin_a, cos_a, 0, 0,
+        0, 0, 1.0, 0,
+        0, 0, 0, 1
+      ])
+      // 平移矩阵
+      const trxMrx_array2 = new Float32Array([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0.5, 0.5, 0, 1
+      ])
+      //缩放矩阵
+      const trxMrx_array3 = new Float32Array([
+        1.5, 0, 0, 0,
+        0, 0.5, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ])
+
+      gl.uniformMatrix4fv(trsMrx, false, trxMrx_array3);
+
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.LINE_LOOP, 0, 3);
+    }
+    transform(0)
+
+    // let a = 0;
+    // function start() {
+    //   transform(a++)
+    //   requestAnimationFrame(start)
+    // }
+    // start()
+    function initVertexBuffers(gl, pointAarray) {
+      const array = new Float32Array(pointAarray);
+
+      const n = 3;
+      // 创建缓冲区对象
+      const vertexBuffer = gl.createBuffer()
+      // 将缓冲区对象绑定到目标
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      // 向缓冲区写入数据
+      gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+      const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+
+      gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(a_Position)
+      return n
+    }
+  </script>
+
+</body>
+
+</html>
