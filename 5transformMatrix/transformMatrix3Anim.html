@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" width="300" height="300"></canvas>
+  <script src="../utils/index.js"></script>
+  <script src="../utils/cuon-matrix.js"></script>
+
+  <script>
+
+    function main() {
+      const canvas = document.querySelector('#canvas');
+      const gl = canvas.getContext('webgl');
+
+      const ANGER_SPEED = 45.0;
+
+      let g_last = Date.now();
+      // 旋转速度 45°/s
+      const VSHADER_SOURCE = `
+        attribute vec4 a_Position;
+        uniform mat4 trxMatrix;
+
+        void main(){
+          gl_Position = trxMatrix * a_Position;
+        }
+      `
+      const FSHADER_SOURCE = `
+        void main(){
+          gl_FragColor = vec4(0.0,0.0,1.0,1.0);
+        }
+      `
+      if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.log('failed to init shaders');
+        return
+      }
+      const pointAarray = [0.0, 0.5, -0.5, -0.5, 0.5, -0.5];
+      const n = pointAarray.length / 2
+      initVertexBuffers(gl, pointAarray, n);
+
+      const trxMatrix = gl.getUniformLocation(gl.program, 'trxMatrix');
+
+      let curAnger = 0;
+
+      const ModelMatrix = new Matrix4()
+      gl.clearColor(0, 1, 0, 1)
+
+      function tick() {
+        curAnger = animate(curAnger)
+        draw(gl, n, curAnger, ModelMatrix, trxMatrix);
+        requestAnimationFrame(tick)
+      }
+      tick()
+      function draw(gl, n, Anger, ModelMatrix, trxMatrix) {
+
+        ModelMatrix.setRotate(Anger, 0, 0, 1);
+        gl.uniformMatrix4fv(trxMatrix, false, ModelMatrix.elements);
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.drawArrays(gl.TRIANGLES, 0, n)
+      }
+
+
+      function animate(anger) {
+        const now = Date.now()
+        const elapsed = now - g_last;
+        g_last = now;
+        let newAnger = anger + (ANGER_SPEED * elapsed) / 1000.0;
+        return newAnger %= 360
+      }
+
+
+
+      function initVertexBuffers(gl, pointAarray, n = 3) {
+        const array = new Float32Array(pointAarray);
+
+        // 创建缓冲求对象
+        const vertexBuffer = gl.createBuffer();
+        // 将缓冲区绑定到目标
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        // 向缓冲区写入数据
+        gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+
+        const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0)
+        gl.enableVertexAttribArray(a_Position);
+      }
+    }
+    main()
+  </script>
+</body>
+
+</html>
