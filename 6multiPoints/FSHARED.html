@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script src="../utils/index.js"></script>
+  <canvas id="canvas" width="300" height="300"></canvas>
+
+
+  <script>
+    // 证明 片元着色器 是一次一次执行的
+    function main() {
+      const canvas = document.querySelector("#canvas")
+      const gl = canvas.getContext('webgl')
+
+      const VSHARED_SOURCE = `
+        attribute vec4 a_Position;
+        void main(){
+          gl_Position = a_Position;
+        }
+      `
+      const FSHARED_SOURCE = `
+        precision lowp float;
+        uniform vec2 u_data;
+        void main(){
+          gl_FragColor = vec4(gl_FragCoord.x/u_data.x,0,gl_FragCoord.y/u_data.y,1.0);
+        }
+      `
+      if (!initShaders(gl, VSHARED_SOURCE, FSHARED_SOURCE)) {
+        console.warn('init shader failed');
+        return
+      }
+      initVertexBuffers(gl, [0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+
+      const uData = gl.getUniformLocation(gl.program, 'u_data');
+      gl.uniform2f(uData, 300.0, 300.0);
+
+
+      gl.clearColor(0, 0, 0, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      function initVertexBuffers(gl, pPosArray) {
+        const pPos = new Float32Array(pPosArray);
+
+        const posBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, pPos, gl.STATIC_DRAW);
+        const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+      }
+    }
+    main()
+
+  </script>
+
+</body>
+
+</html>
